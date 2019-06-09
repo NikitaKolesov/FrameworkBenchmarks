@@ -12,7 +12,7 @@ class FortuneHTMLParser(HTMLParser):
         HTMLParser.__init__(self)
         self.body = []
 
-    valid_fortune = '''<!doctype html><html>
+    valid_fortune = """<!doctype html><html>
 <head><title>Fortunes</title></head>
 <body><table>
 <tr><th>id</th><th>message</th></tr>
@@ -29,14 +29,14 @@ class FortuneHTMLParser(HTMLParser):
 <tr><td>9</td><td>Feature: A bug with seniority.</td></tr>
 <tr><td>1</td><td>fortune: No such file or directory</td></tr>
 <tr><td>12</td><td>フレームワークのベンチマーク</td></tr>
-</table></body></html>'''
+</table></body></html>"""
 
     def handle_decl(self, decl):
-        '''
+        """
         Is called when a doctype or other such tag is read in.
         For our purposes, we assume this is only going to be
         "DOCTYPE html", so we will surround it with "<!" and ">".
-        '''
+        """
         # The spec says that for HTML this is case insensitive,
         # and since we did not specify xml compliance (where
         # incorrect casing would throw a syntax error), we must
@@ -44,7 +44,7 @@ class FortuneHTMLParser(HTMLParser):
         self.body.append("<!{d}>".format(d=decl.lower()))
 
     def handle_charref(self, name):
-        '''
+        """
         This is called when an HTML character is parsed (i.e.
         &quot;). There are a number of issues to be resolved
         here. For instance, some tests choose to leave the
@@ -56,7 +56,7 @@ class FortuneHTMLParser(HTMLParser):
         validate the input against a single valid spec string.
         Another example problem: "&quot;" is valid, but so is
         "&#34;"
-        '''
+        """
         val = name.lower()
         # "&#34;" is a valid escaping, but we are normalizing
         # it so that our final parse can just be checked for
@@ -96,34 +96,34 @@ class FortuneHTMLParser(HTMLParser):
             self.body.append(")")
 
     def handle_entityref(self, name):
-        '''
+        """
         Again, "&mdash;" is a valid escaping of "—", but we
         need to normalize to "—" for equality checking.
-        '''
+        """
         if name == "mdash":
             self.body.append("—")
         else:
             self.body.append("&{n};".format(n=name))
 
     def handle_starttag(self, tag, attrs):
-        '''
+        """
         This is called every time a tag is opened. We append
         each one wrapped in "<" and ">".
-        '''
+        """
         self.body.append("<{t}>".format(t=tag))
 
         # Append a newline after the <table> and <html>
-        if tag.lower() == 'table' or tag.lower() == 'html':
+        if tag.lower() == "table" or tag.lower() == "html":
             self.body.append(os.linesep)
 
     def handle_data(self, data):
-        '''
+        """
         This is called whenever data is presented inside of a
         start and end tag. Generally, this will only ever be
         the contents inside of "<td>" and "</td>", but there
         are also the "<title>" and "</title>" tags.
-        '''
-        if data.strip() != '':
+        """
+        if data.strip() != "":
             # After a LOT of debate, these are now considered
             # valid in data. The reason for this approach is
             # because a few tests use tools which determine
@@ -142,44 +142,53 @@ class FortuneHTMLParser(HTMLParser):
             # We replace them with their escapings here in
             # order to have a noramlized string for equality
             # comparison at the end.
-            data = data.replace('\'', '&apos;')
-            data = data.replace('"', '&quot;')
-            data = data.replace('>', '&gt;')
+            data = data.replace("'", "&apos;")
+            data = data.replace('"', "&quot;")
+            data = data.replace(">", "&gt;")
 
             self.body.append("{d}".format(d=data))
 
     def handle_endtag(self, tag):
-        '''
+        """
         This is called every time a tag is closed. We append
         each one wrapped in "</" and ">".
-        '''
+        """
         self.body.append("</{t}>".format(t=tag))
 
         # Append a newline after each </tr> and </head>
-        if tag.lower() == 'tr' or tag.lower() == 'head':
+        if tag.lower() == "tr" or tag.lower() == "head":
             self.body.append(os.linesep)
 
     def isValidFortune(self, name, out):
-        '''
+        """
         Returns whether the HTML input parsed by this parser
         is valid against our known "fortune" spec.
         The parsed data in 'body' is joined on empty strings
         and checked for equality against our spec.
-        '''
-        body = ''.join(self.body)
+        """
+        body = "".join(self.body)
         same = self.valid_fortune == body
         diff_lines = []
         if not same:
             output = "Oh no! I compared {!s}".format(self.valid_fortune)
-            output += os.linesep + os.linesep + "to" + os.linesep + os.linesep + body + os.linesep
+            output += (
+                os.linesep
+                + os.linesep
+                + "to"
+                + os.linesep
+                + os.linesep
+                + body
+                + os.linesep
+            )
             output += "Fortune invalid. Diff following:" + os.linesep
             headers_left = 3
             for line in unified_diff(
-                    self.valid_fortune.split(os.linesep),
-                    body.split(os.linesep),
-                    fromfile='Valid',
-                    tofile='Response',
-                    n=0):
+                self.valid_fortune.split(os.linesep),
+                body.split(os.linesep),
+                fromfile="Valid",
+                tofile="Response",
+                n=0,
+            ):
                 diff_lines.append(line)
                 output += line
                 headers_left -= 1

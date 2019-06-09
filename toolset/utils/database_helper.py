@@ -6,8 +6,12 @@ import pymongo
 def test_database(config, database_name):
     if database_name == "mysql":
         try:
-            db = MySQLdb.connect(config.database_host, "benchmarkdbuser",
-                                 "benchmarkdbpass", "hello_world")
+            db = MySQLdb.connect(
+                config.database_host,
+                "benchmarkdbuser",
+                "benchmarkdbpass",
+                "hello_world",
+            )
             cursor = db.cursor()
             cursor.execute("SELECT 1")
             cursor.fetchall()
@@ -21,7 +25,8 @@ def test_database(config, database_name):
                 port="5432",
                 user="benchmarkdbuser",
                 password="benchmarkdbpass",
-                database="hello_world")
+                database="hello_world",
+            )
             cursor = db.cursor()
             cursor.execute("SELECT 1")
             cursor.fetchall()

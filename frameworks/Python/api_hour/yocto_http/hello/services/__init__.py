@@ -11,4 +11,3 @@ def queries_number(number):
     if queries > 500:
         queries = 500
     return queries
-

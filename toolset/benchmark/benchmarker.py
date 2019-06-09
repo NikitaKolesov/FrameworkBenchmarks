@@ -19,9 +19,9 @@ import numbers
 
 class Benchmarker:
     def __init__(self, config):
-        '''
+        """
         Initialize the benchmarker.
-        '''
+        """
         self.config = config
         self.time_logger = TimeLogger()
         self.metadata = Metadata(self)
@@ -38,27 +38,28 @@ class Benchmarker:
     ##########################################################################################
 
     def run(self):
-        '''
+        """
         This process involves setting up the client/server machines
         with any necessary change. Then going through each test,
         running their docker build and run, verifying the URLs, and
         running benchmarks against them.
-        '''
+        """
         # Generate metadata
         self.metadata.list_test_metadata()
 
         any_failed = False
         # Run tests
-        log("Running Tests...", border='=')
+        log("Running Tests...", border="=")
 
         # build wrk and all databases needed for current run
         self.docker_helper.build_wrk()
         self.docker_helper.build_databases()
 
-        with open(os.path.join(self.results.directory, 'benchmark.log'),
-                  'w') as benchmark_log:
+        with open(
+            os.path.join(self.results.directory, "benchmark.log"), "w"
+        ) as benchmark_log:
             for test in self.tests:
-                log("Running Test: %s" % test.name, border='-')
+                log("Running Test: %s" % test.name, border="-")
                 with self.config.quiet_out.enable():
                     if not self.__run_test(test, benchmark_log):
                         any_failed = True
@@ -67,7 +68,7 @@ class Benchmarker:
 
         # Parse results
         if self.config.mode == "benchmark":
-            log("Parsing Results ...", border='=')
+            log("Parsing Results ...", border="=")
             self.results.parse(self.tests)
 
         self.results.set_completion_time()
@@ -87,39 +88,33 @@ class Benchmarker:
 
     def __exit_test(self, success, prefix, file, message=None):
         if message:
-            log(message,
-                prefix=prefix,
-                file=file,
-                color=Fore.RED if success else '')
+            log(message, prefix=prefix, file=file, color=Fore.RED if success else "")
         self.time_logger.log_test_end(log_prefix=prefix, file=file)
         return success
 
     def __run_test(self, test, benchmark_log):
-        '''
+        """
         Runs the given test, verifies that the webapp is accepting requests,
         optionally benchmarks the webapp, and ultimately stops all services
         started for this test.
-        '''
+        """
 
         log_prefix = "%s: " % test.name
         # Start timing the total test duration
         self.time_logger.mark_test_start()
 
         if self.config.mode == "benchmark":
-            log("Benchmarking %s" % test.name,
-                file=benchmark_log,
-                border='-')
+            log("Benchmarking %s" % test.name, file=benchmark_log, border="-")
 
         # If the test is in the excludes list, we skip it
         if self.config.exclude and test.name in self.config.exclude:
             message = "Test {name} has been added to the excludes list. Skipping.".format(
-                name=test.name)
+                name=test.name
+            )
             self.results.write_intermediate(test.name, message)
             return self.__exit_test(
-                success=False,
-                message=message,
-                prefix=log_prefix,
-                file=benchmark_log)
+                success=False, message=message, prefix=log_prefix, file=benchmark_log
+            )
 
         database_container = None
         try:
@@ -127,58 +122,71 @@ class Benchmarker:
             if test.database.lower() != "none":
                 self.time_logger.mark_starting_database()
                 database_container = self.docker_helper.start_database(
-                    test.database.lower())
+                    test.database.lower()
+                )
                 if database_container is None:
                     message = "ERROR: Problem building/running database container"
                     return self.__exit_test(
                         success=False,
                         message=message,
                         prefix=log_prefix,
-                        file=benchmark_log)
+                        file=benchmark_log,
+                    )
                 self.time_logger.mark_started_database()
 
             # Start webapp
             container = test.start()
             self.time_logger.mark_test_starting()
             if container is None:
-                message = "ERROR: Problem starting {name}".format(
-                    name=test.name)
+                message = "ERROR: Problem starting {name}".format(name=test.name)
                 self.results.write_intermediate(test.name, message)
                 return self.__exit_test(
                     success=False,
                     message=message,
                     prefix=log_prefix,
-                    file=benchmark_log)
+                    file=benchmark_log,
+                )
 
             max_time = time.time() + 60
             while True:
                 accepting_requests = test.is_accepting_requests()
-                if accepting_requests \
-                        or time.time() >= max_time \
-                        or not self.docker_helper.server_container_exists(container.id):
+                if (
+                    accepting_requests
+                    or time.time() >= max_time
+                    or not self.docker_helper.server_container_exists(container.id)
+                ):
                     break
                 time.sleep(1)
 
-            if hasattr(test, 'wait_before_sending_requests') and isinstance(test.wait_before_sending_requests, numbers.Integral) and test.wait_before_sending_requests > 0:
+            if (
+                hasattr(test, "wait_before_sending_requests")
+                and isinstance(test.wait_before_sending_requests, numbers.Integral)
+                and test.wait_before_sending_requests > 0
+            ):
                 time.sleep(test.wait_before_sending_requests)
 
             if not accepting_requests:
-                message = "ERROR: Framework is not accepting requests from client machine"
+                message = (
+                    "ERROR: Framework is not accepting requests from client machine"
+                )
                 self.results.write_intermediate(test.name, message)
                 return self.__exit_test(
                     success=False,
                     message=message,
                     prefix=log_prefix,
-                    file=benchmark_log)
+                    file=benchmark_log,
+                )
 
             self.time_logger.mark_test_accepting_requests()
 
             # Debug mode blocks execution here until ctrl+c
             if self.config.mode == "debug":
-                log("Entering debug mode. Server has started. CTRL-c to stop.",
+                log(
+                    "Entering debug mode. Server has started. CTRL-c to stop.",
                     prefix=log_prefix,
                     file=benchmark_log,
-                    color=Fore.YELLOW)
+                    color=Fore.YELLOW,
+                )
                 while True:
                     time.sleep(1)
 
@@ -193,20 +201,19 @@ class Benchmarker:
                 self.time_logger.mark_benchmarking_start()
                 self.__benchmark(test, benchmark_log)
                 self.time_logger.log_benchmarking_end(
-                    log_prefix=log_prefix, file=benchmark_log)
+                    log_prefix=log_prefix, file=benchmark_log
+                )
 
             # Log test timing stats
             self.time_logger.log_build_flush(benchmark_log)
             self.time_logger.log_database_start_time(log_prefix, benchmark_log)
-            self.time_logger.log_test_accepting_requests(
-                log_prefix, benchmark_log)
+            self.time_logger.log_test_accepting_requests(log_prefix, benchmark_log)
             self.time_logger.log_verify_end(log_prefix, benchmark_log)
 
             # Save results thus far into the latest results directory
-            self.results.write_intermediate(test.name,
-                                            time.strftime(
-                                                "%Y%m%d%H%M%S",
-                                                time.localtime()))
+            self.results.write_intermediate(
+                test.name, time.strftime("%Y%m%d%H%M%S", time.localtime())
+            )
 
             # Upload the results thus far to another server (optional)
             self.results.upload()
@@ -216,37 +223,36 @@ class Benchmarker:
                     success=False,
                     message="Failed verify!",
                     prefix=log_prefix,
-                    file=benchmark_log)
+                    file=benchmark_log,
+                )
         except Exception as e:
             tb = traceback.format_exc()
-            self.results.write_intermediate(test.name,
-                                            "error during test: " + str(e))
+            self.results.write_intermediate(test.name, "error during test: " + str(e))
             log(tb, prefix=log_prefix, file=benchmark_log)
             return self.__exit_test(
                 success=False,
                 message="Error during test: %s" % test.name,
                 prefix=log_prefix,
-                file=benchmark_log)
+                file=benchmark_log,
+            )
         finally:
             self.docker_helper.stop()
 
-        return self.__exit_test(
-            success=True, prefix=log_prefix, file=benchmark_log)
+        return self.__exit_test(success=True, prefix=log_prefix, file=benchmark_log)
 
     def __benchmark(self, framework_test, benchmark_log):
-        '''
+        """
         Runs the benchmark for each type of test that it implements
-        '''
+        """
 
         def benchmark_type(test_type):
             log("BENCHMARKING %s ... " % test_type.upper(), file=benchmark_log)
 
             test = framework_test.runTests[test_type]
-            raw_file = self.results.get_raw_file(framework_test.name,
-                                                 test_type)
+            raw_file = self.results.get_raw_file(framework_test.name, test_type)
             if not os.path.exists(raw_file):
                 # Open to create the empty file
-                with open(raw_file, 'w'):
+                with open(raw_file, "w"):
                     pass
 
             if not test.failed:
@@ -254,14 +260,13 @@ class Benchmarker:
                 self.__begin_logging(framework_test, test_type)
 
                 script = self.config.types[test_type].get_script_name()
-                script_variables = self.config.types[
-                    test_type].get_script_variables(
-                        test.name, "http://%s:%s%s" % (self.config.server_host,
-                                                       framework_test.port,
-                                                       test.get_url()))
+                script_variables = self.config.types[test_type].get_script_variables(
+                    test.name,
+                    "http://%s:%s%s"
+                    % (self.config.server_host, framework_test.port, test.get_url()),
+                )
 
-                self.docker_helper.benchmark(script, script_variables,
-                                             raw_file)
+                self.docker_helper.benchmark(script, script_variables, raw_file)
 
                 # End resource usage metrics collection
                 self.__end_logging()
@@ -271,34 +276,36 @@ class Benchmarker:
             # TODO move into log somehow
             pprint(results)
 
-            self.results.report_benchmark_results(framework_test, test_type,
-                                                  results['results'])
+            self.results.report_benchmark_results(
+                framework_test, test_type, results["results"]
+            )
             log("Complete", file=benchmark_log)
 
         for test_type in framework_test.runTests:
             benchmark_type(test_type)
 
     def __begin_logging(self, framework_test, test_type):
-        '''
+        """
         Starts a thread to monitor the resource usage, to be synced with the
         client's time.
         TODO: MySQL and InnoDB are possible. Figure out how to implement them.
-        '''
+        """
         output_file = "{file_name}".format(
-            file_name=self.results.get_stats_file(framework_test.name,
-                                                  test_type))
+            file_name=self.results.get_stats_file(framework_test.name, test_type)
+        )
         dstat_string = "dstat -Tafilmprs --aio --fs --ipc --lock --socket --tcp \
                                       --raw --udp --unix --vm --disk-util \
                                       --rpc --rpcd --output {output_file}".format(
-            output_file=output_file)
+            output_file=output_file
+        )
         cmd = shlex.split(dstat_string)
         self.subprocess_handle = subprocess.Popen(
-            cmd, stdout=FNULL, stderr=subprocess.STDOUT)
+            cmd, stdout=FNULL, stderr=subprocess.STDOUT
+        )
 
     def __end_logging(self):
-        '''
+        """
         Stops the logger thread and blocks until shutdown is complete.
-        '''
+        """
         self.subprocess_handle.terminate()
         self.subprocess_handle.communicate()
-

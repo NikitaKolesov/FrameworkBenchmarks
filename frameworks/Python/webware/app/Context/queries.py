@@ -5,7 +5,8 @@ from functools import partial
 from WebKit.HTTPContent import HTTPContent
 from DbSession import Database
 from World import World
-import UrlHelper 
+import UrlHelper
+
 
 class queries(HTTPContent):
     def defaultAction(self):

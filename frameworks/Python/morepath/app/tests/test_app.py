@@ -15,10 +15,10 @@ def test_json():
     app = App()
     c = Client(app)
 
-    response = c.get('/json', status=200)
+    response = c.get("/json", status=200)
     assert response.headerlist == [
-        ('Content-Type', 'application/json'),
-        ('Content-Length', '27')
+        ("Content-Type", "application/json"),
+        ("Content-Length", "27"),
     ]
     assert response.json == {"message": "Hello, World!"}
 
@@ -28,12 +28,12 @@ def test_db():
     app = App()
     c = Client(app)
 
-    response = c.get('/db', status=200)
-    assert response.content_type == 'application/json'
-    assert 'id' in response.json
-    assert 'randomNumber' in response.json
-    assert 1 <= response.json['id'] <= 10000
-    assert 1 <= response.json['randomNumber'] <= 10000
+    response = c.get("/db", status=200)
+    assert response.content_type == "application/json"
+    assert "id" in response.json
+    assert "randomNumber" in response.json
+    assert 1 <= response.json["id"] <= 10000
+    assert 1 <= response.json["randomNumber"] <= 10000
 
 
 def test_queries():
@@ -41,8 +41,8 @@ def test_queries():
     app = App()
     c = Client(app)
 
-    response = c.get('/queries?queries=', status=200)
-    assert response.content_type == 'application/json'
+    response = c.get("/queries?queries=", status=200)
+    assert response.content_type == "application/json"
     assert len(response.json) == 1
 
 
@@ -51,8 +51,8 @@ def test_queries_foo():
     app = App()
     c = Client(app)
 
-    response = c.get('/queries?queries=foo', status=200)
-    assert response.content_type == 'application/json'
+    response = c.get("/queries?queries=foo", status=200)
+    assert response.content_type == "application/json"
     assert len(response.json) == 1
 
 
@@ -61,8 +61,8 @@ def test_queries_0():
     app = App()
     c = Client(app)
 
-    response = c.get('/queries?queries=0', status=200)
-    assert response.content_type == 'application/json'
+    response = c.get("/queries?queries=0", status=200)
+    assert response.content_type == "application/json"
     assert len(response.json) == 1
 
 
@@ -71,8 +71,8 @@ def test_queries_999():
     app = App()
     c = Client(app)
 
-    response = c.get('/queries?queries=999', status=200)
-    assert response.content_type == 'application/json'
+    response = c.get("/queries?queries=999", status=200)
+    assert response.content_type == "application/json"
     assert len(response.json) == 500
 
 
@@ -81,16 +81,16 @@ def test_queries_10():
     app = App()
     c = Client(app)
 
-    response = c.get('/queries?queries=10', status=200)
-    assert response.content_type == 'application/json'
+    response = c.get("/queries?queries=10", status=200)
+    assert response.content_type == "application/json"
     assert len(response.json) == 10
 
     obj_list = response.json
     for obj in obj_list:
-        assert 'id' in obj
-        assert 'randomNumber' in obj
-        assert 1 <= obj['id'] <= 10000
-        assert 1 <= obj['randomNumber'] <= 10000
+        assert "id" in obj
+        assert "randomNumber" in obj
+        assert 1 <= obj["id"] <= 10000
+        assert 1 <= obj["randomNumber"] <= 10000
 
 
 def test_fortunes():
@@ -98,10 +98,10 @@ def test_fortunes():
     app = App()
     c = Client(app)
 
-    response = c.get('/fortunes', status=200)
+    response = c.get("/fortunes", status=200)
     assert response.headerlist == [
-        ('Content-Type', 'text/html; charset=UTF-8'),
-        ('Content-Length', '1304')
+        ("Content-Type", "text/html; charset=UTF-8"),
+        ("Content-Length", "1304"),
     ]
     assert response.text == fortunes
 
@@ -111,8 +111,8 @@ def test_updates():
     app = App()
     c = Client(app)
 
-    response = c.get('/updates?queries=', status=200)
-    assert response.content_type == 'application/json'
+    response = c.get("/updates?queries=", status=200)
+    assert response.content_type == "application/json"
     assert len(response.json) == 1
 
 
@@ -121,8 +121,8 @@ def test_updates_foo():
     app = App()
     c = Client(app)
 
-    response = c.get('/updates?queries=foo', status=200)
-    assert response.content_type == 'application/json'
+    response = c.get("/updates?queries=foo", status=200)
+    assert response.content_type == "application/json"
     assert len(response.json) == 1
 
 
@@ -131,8 +131,8 @@ def test_updates_0():
     app = App()
     c = Client(app)
 
-    response = c.get('/updates?queries=0', status=200)
-    assert response.content_type == 'application/json'
+    response = c.get("/updates?queries=0", status=200)
+    assert response.content_type == "application/json"
     assert len(response.json) == 1
 
 
@@ -141,8 +141,8 @@ def test_updates_999():
     app = App()
     c = Client(app)
 
-    response = c.get('/updates?queries=999', status=200)
-    assert response.content_type == 'application/json'
+    response = c.get("/updates?queries=999", status=200)
+    assert response.content_type == "application/json"
     assert len(response.json) == 500
 
 
@@ -151,16 +151,16 @@ def test_updates_10():
     app = App()
     c = Client(app)
 
-    response = c.get('/updates?queries=10', status=200)
-    assert response.content_type == 'application/json'
+    response = c.get("/updates?queries=10", status=200)
+    assert response.content_type == "application/json"
     assert len(response.json) == 10
 
     obj_list = response.json
     for obj in obj_list:
-        assert 'id' in obj
-        assert 'randomNumber' in obj
-        assert 1 <= obj['id'] <= 10000
-        assert 1 <= obj['randomNumber'] <= 10000
+        assert "id" in obj
+        assert "randomNumber" in obj
+        assert 1 <= obj["id"] <= 10000
+        assert 1 <= obj["randomNumber"] <= 10000
 
 
 def test_plaintext():
@@ -168,12 +168,12 @@ def test_plaintext():
     app = App()
     c = Client(app)
 
-    response = c.get('/plaintext', status=200)
+    response = c.get("/plaintext", status=200)
     assert response.headerlist == [
-        ('Content-Type', 'text/plain; charset=UTF-8'),
-        ('Content-Length', '13')
+        ("Content-Type", "text/plain; charset=UTF-8"),
+        ("Content-Length", "13"),
     ]
-    assert response.text == 'Hello, World!'
+    assert response.text == "Hello, World!"
 
 
 fortunes = """<!DOCTYPE html>

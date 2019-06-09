@@ -17,7 +17,9 @@ from sqlalchemy.types import String, Integer, Unicode
 if sys.version_info[0] == 3:
     xrange = range
 
-DATABASE_URI = 'mysql://benchmarkdbuser:benchmarkdbpass@tfb-database:3306/hello_world?charset=utf8'
+DATABASE_URI = (
+    "mysql://benchmarkdbuser:benchmarkdbpass@tfb-database:3306/hello_world?charset=utf8"
+)
 
 Base = declarative_base()
 db_engine = create_engine(DATABASE_URI)
@@ -25,9 +27,8 @@ Session = sessionmaker(bind=db_engine)
 db_session = Session()
 
 env = Environment(
-    loader=PackageLoader("app", "templates"),
-    autoescape=True,
-    auto_reload=False)
+    loader=PackageLoader("app", "templates"), autoescape=True, auto_reload=False
+)
 
 app = Klein()
 
@@ -38,10 +39,7 @@ class Fortune(Base):
     message = Column(String)
 
     def serialize(self):
-        return {
-            'id': self.id,
-            'randomNumber': self.randomNumber,
-        }
+        return {"id": self.id, "randomNumber": self.randomNumber}
 
 
 class World(Base):
@@ -50,10 +48,7 @@ class World(Base):
     randomNumber = Column(Integer)
 
     def serialize(self):
-        return {
-            'id': self.id,
-            'randomNumber': self.randomNumber,
-        }
+        return {"id": self.id, "randomNumber": self.randomNumber}
 
 
 def getQueryNum(queryString):
@@ -133,8 +128,7 @@ def updates(request):
 def fortune(request):
     request.setHeader("Content-Type", "text/html; charset=UTF-8")
     fortunes = db_session.query(Fortune).all()
-    fortunes.append(
-        Fortune(id=0, message="Additional fortune added at request time."))
+    fortunes.append(Fortune(id=0, message="Additional fortune added at request time."))
     fortunes.sort(key=attrgetter("message"))
     template = env.get_template("fortunes.html")
     return template.render(fortunes=fortunes)

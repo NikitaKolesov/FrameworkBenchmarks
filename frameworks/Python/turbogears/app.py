@@ -14,15 +14,21 @@ from models.Fortune import Fortune
 from models.World import World
 
 
-DBDRIVER = 'mysql'
-DBHOSTNAME = 'tfb-database'
-DATABASE_URI = '%s://benchmarkdbuser:benchmarkdbpass@%s:3306/hello_world?charset=utf8' % (DBDRIVER, DBHOSTNAME)
+DBDRIVER = "mysql"
+DBHOSTNAME = "tfb-database"
+DATABASE_URI = (
+    "%s://benchmarkdbuser:benchmarkdbpass@%s:3306/hello_world?charset=utf8"
+    % (DBDRIVER, DBHOSTNAME)
+)
 
 db_engine = create_engine(DATABASE_URI)
 Session = sessionmaker(bind=db_engine)
 db_session = Session()
 
-env = Environment(loader=PackageLoader("app", "templates"), autoescape=True, auto_reload=False)
+env = Environment(
+    loader=PackageLoader("app", "templates"), autoescape=True, auto_reload=False
+)
+
 
 def getQueryNum(queryString):
     try:
@@ -33,10 +39,10 @@ def getQueryNum(queryString):
             return 500
         return num_queries
     except ValueError:
-         return 1
+        return 1
+
 
 class RootController(TGController):
-
     @expose(content_type="text/plain")
     def plaintext(self):
         return "Hello, World!"
@@ -76,10 +82,13 @@ class RootController(TGController):
     @expose()
     def fortune(self):
         fortunes = db_session.query(Fortune).all()
-        fortunes.append(Fortune(id=0, message="Additional fortune added at request time."))
+        fortunes.append(
+            Fortune(id=0, message="Additional fortune added at request time.")
+        )
         fortunes.sort(key=attrgetter("message"))
         template = env.get_template("fortunes.html")
         return template.render(fortunes=fortunes)
+
 
 config = AppConfig(minimal=True, root_controller=RootController())
 config.renderers.append("jinja")

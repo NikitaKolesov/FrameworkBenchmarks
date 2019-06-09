@@ -1,9 +1,9 @@
-
 from WebKit.HTTPContent import HTTPContent
 from DbSession import Database
 from World import World
 import json
 from random import randint
+
 
 class db(HTTPContent):
     def defaultAction(self):

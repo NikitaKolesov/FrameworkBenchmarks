@@ -6,7 +6,8 @@ from toolset.utils.metadata import Metadata
 
 class Scaffolding:
     def __init__(self, benchmarker):
-        print("""
+        print(
+            """
 -------------------------------------------------------------------------------
     This wizard is intended to help build the scaffolding required for a new 
     test to be benchmarked.
@@ -14,7 +15,7 @@ class Scaffolding:
     From here, you will be prompted for values related to the test you
     wish to add.
 -------------------------------------------------------------------------------"""
-              )
+        )
 
         self.benchmarker = benchmarker
         self.benchmarker_config = benchmarker.config
@@ -34,11 +35,13 @@ class Scaffolding:
             print("")
 
     def __gather_display_name(self):
-        print("""
+        print(
+            """
   The name of your test as you wish it to be displayed on the results page.
 
   Example: Gemini, Gin, Express
-    """)
+    """
+        )
         self.__prompt_display_name()
         while not self.display_name:
             self.__prompt_display_name()
@@ -53,18 +56,23 @@ class Scaffolding:
                 found = True
 
         if found:
-            print("""
+            print(
+                """
   It appears that there is already a '%s' framework in the test suite. You will
   have to pick a different name.
-      """ % self.display_name)
+      """
+                % self.display_name
+            )
             self.display_name = None
 
     def __gather_language(self):
-        print("""
+        print(
+            """
   The language in which your test implementation is written.
 
   Example: Java, Go, PHP
-    """)
+    """
+        )
         self.language = None
         while not self.language:
             self.__prompt_language()
@@ -83,9 +91,10 @@ class Scaffolding:
             for lang in known_languages:
                 if lang.lower()[:1] == self.language.lower()[:1]:
                     similar.append(lang)
-            similar = ', '.join(similar)
+            similar = ", ".join(similar)
 
-            print("""
+            print(
+                """
   That language is not currently in our list of known languages.
   
   Here is a list of similar languages present in our benchmark suite that you
@@ -94,12 +103,14 @@ class Scaffolding:
   %s
       
   Did you mean to add the new language, '%s', to the benchmark suite?
-      """ % (similar, self.language))
+      """
+                % (similar, self.language)
+            )
             valid = self.__prompt_confirm_new_language()
             while not valid:
                 valid = self.__prompt_confirm_new_language()
 
-            if self.confirm_new_lang == 'n':
+            if self.confirm_new_lang == "n":
                 self.language = None
             else:
                 self.language = self.language.title()
@@ -107,12 +118,16 @@ class Scaffolding:
         return self.language
 
     def __prompt_confirm_new_language(self):
-        self.confirm_new_lang = raw_input("Create New Language '%s' (y/n): " %
-                                          self.language).strip().lower()
-        return self.confirm_new_lang == 'y' or self.confirm_new_lang == 'n'
+        self.confirm_new_lang = (
+            raw_input("Create New Language '%s' (y/n): " % self.language)
+            .strip()
+            .lower()
+        )
+        return self.confirm_new_lang == "y" or self.confirm_new_lang == "n"
 
     def __gather_approach(self):
-        print("""
+        print(
+            """
   The approach of your test implementation.
 
   1) Realistic: Uses the framework with most out-of-the-box functionality 
@@ -126,21 +141,23 @@ class Scaffolding:
   Note: If you are unsure, then your approach is probably Realistic. The
         Stripped approach is seldom used and will not have results displayed
         by default on the results website.
-    """)
+    """
+        )
         valid = self.__prompt_approach()
         while not valid:
             valid = self.__prompt_approach()
 
     def __prompt_approach(self):
         self.approach = raw_input("Approach [1/2]: ").strip()
-        if self.approach == '1':
-            self.approach = 'Realistic'
-        if self.approach == '2':
-            self.approach = 'Stripped'
-        return self.approach == 'Realistic' or self.approach == 'Stripped'
+        if self.approach == "1":
+            self.approach = "Realistic"
+        if self.approach == "2":
+            self.approach = "Stripped"
+        return self.approach == "Realistic" or self.approach == "Stripped"
 
     def __gather_classification(self):
-        print("""
+        print(
+            """
   The classification of your test implementation.
 
   1) Fullstack: Robust framework expected to provide high-level functionality 
@@ -154,31 +171,35 @@ class Scaffolding:
                 such as, for example, server-composed views.
   3) Platform:  Barebones infrastructure for servicing HTTP requests, but does
                 not include a framework at all.
-    """)
+    """
+        )
         valid = self.__prompt_classification()
         while not valid:
             valid = self.__prompt_classification()
-        if self.classification == 'Platform':
-            self.platform = 'None'
-            self.framework = 'None'
+        if self.classification == "Platform":
+            self.platform = "None"
+            self.framework = "None"
         else:
             self.framework = self.display_name
             self.__gather_platform()
 
     def __prompt_classification(self):
         self.classification = raw_input("Classification [1/2/3]: ").strip()
-        if self.classification == '1':
-            self.classification = 'Fullstack'
-        if self.classification == '2':
-            self.classification = 'Micro'
-        if self.classification == '3':
-            self.classification = 'Platform'
-        return self.classification == 'Fullstack' or \
-               self.classification == 'Micro' or \
-               self.classification == 'Platform'
+        if self.classification == "1":
+            self.classification = "Fullstack"
+        if self.classification == "2":
+            self.classification = "Micro"
+        if self.classification == "3":
+            self.classification = "Platform"
+        return (
+            self.classification == "Fullstack"
+            or self.classification == "Micro"
+            or self.classification == "Platform"
+        )
 
     def __gather_platform(self):
-        print("""
+        print(
+            """
   The platform of your test implementation.
 
   The platform is the low-level software or API used to host web applications 
@@ -189,18 +210,21 @@ class Scaffolding:
   much of that by which we define a platform, leave black.
 
   Example: Servlet, Wai, .NET
-    """)
+    """
+        )
         self.__prompt_platform()
 
     def __prompt_platform(self):
         self.platform = raw_input("Platform (optional): ").strip()
-        if self.platform == '':
-            self.platform = 'None'
+        if self.platform == "":
+            self.platform = "None"
 
     def __gather_database(self):
-        print("""
+        print(
+            """
   Which database will you be using for your test?
-    """)
+    """
+        )
         i = 1
         prompt = "Database ["
         options = []
@@ -209,8 +233,7 @@ class Scaffolding:
             prompt += "{!s}/".format(i)
             options.append(db[0])
             i += 1
-        print("  {!s}) None: No database at this time{!s}".format(
-            i, os.linesep))
+        print("  {!s}) None: No database at this time{!s}".format(i, os.linesep))
         prompt += "{!s}]: ".format(i)
         options.append("None")
         valid = self.__prompt_database(prompt, options)
@@ -226,11 +249,12 @@ class Scaffolding:
             return False
 
     def __gather_orm(self):
-        if self.database == 'None':
-            self.orm = 'None'
+        if self.database == "None":
+            self.orm = "None"
             return
 
-        print("""
+        print(
+            """
   How you would classify the ORM (object relational mapper) of your test?
 
   1) Full:  A feature-rich ORM which provides functionality for interacting 
@@ -240,41 +264,43 @@ class Scaffolding:
             for many trivial operations (querying, updating), but not more 
             robust cases (for example, gathering relations).
   3) Raw:   No ORM; raw database access.
-    """)
+    """
+        )
         valid = self.__prompt_orm()
         while not valid:
             valid = self.__prompt_orm()
 
     def __prompt_orm(self):
         self.orm = raw_input("ORM [1/2/3]: ").strip()
-        if self.orm == '1':
-            self.orm = 'Full'
-        if self.orm == '2':
-            self.orm = 'Micro'
-        if self.orm == '3':
-            self.orm = 'Raw'
-        return self.orm == 'Full' or \
-               self.orm == 'Micro' or \
-               self.orm == 'Raw'
+        if self.orm == "1":
+            self.orm = "Full"
+        if self.orm == "2":
+            self.orm = "Micro"
+        if self.orm == "3":
+            self.orm = "Raw"
+        return self.orm == "Full" or self.orm == "Micro" or self.orm == "Raw"
 
     def __gather_webserver(self):
-        print("""
+        print(
+            """
   Name of the front-end webserver sitting in front of your test implementation.
 
   Your test implementation may not use a web-server and may act as its own; you
   can leave this blank in this case.
 
   Example: nginx, Meinheld, httplight
-    """)
+    """
+        )
         self.__prompt_webserver()
 
     def __prompt_webserver(self):
         self.webserver = raw_input("Webserver (optional): ").strip()
-        if self.webserver == '':
-            self.webserver = 'None'
+        if self.webserver == "":
+            self.webserver = "None"
 
     def __gather_versus(self):
-        print("""
+        print(
+            """
   The name of another test (elsewhere in this project) that is a subset of this
   framework.
   This allows for the generation of the framework efficiency chart in the 
@@ -283,16 +309,18 @@ class Scaffolding:
   the Servlet platform.
 
   Example: Servlet, Wai, Undertow
-    """)
+    """
+        )
         self.__prompt_versus()
 
     def __prompt_versus(self):
         self.versus = raw_input("Versus (optional): ").strip()
-        if self.versus == '':
-            self.versus = 'None'
+        if self.versus == "":
+            self.versus = "None"
 
     def __confirm_values(self):
-        print("""
+        print(
+            """
     Name: %s
     Language: %s
     Approach: %s
@@ -305,22 +333,31 @@ class Scaffolding:
   Finalize the initialization of your test given the above values?
 
   Note: once you have initialized your test, you can change these values later.
-    """ % (self.display_name, self.language, self.approach,
-           self.classification, self.platform, self.orm, self.webserver,
-           self.versus))
+    """
+            % (
+                self.display_name,
+                self.language,
+                self.approach,
+                self.classification,
+                self.platform,
+                self.orm,
+                self.webserver,
+                self.versus,
+            )
+        )
 
         valid = self.__prompt_confirmation()
         while not valid:
             valid = self.__prompt_confirmation()
 
-        if self.confirmation == 'y':
+        if self.confirmation == "y":
             self.__build_scaffolding()
         else:
-            print('Aborting')
+            print("Aborting")
 
     def __prompt_confirmation(self):
         self.confirmation = raw_input("Initialize [y/n]: ").strip().lower()
-        return self.confirmation == 'y' or self.confirmation == 'n'
+        return self.confirmation == "y" or self.confirmation == "n"
 
     def __build_scaffolding(self):
         if self.__create_test_folder():
@@ -328,8 +365,9 @@ class Scaffolding:
             self.__edit_scaffold_files()
 
     def __create_test_folder(self):
-        self.language_dir = os.path.join(self.benchmarker_config.lang_root,
-                                         self.language)
+        self.language_dir = os.path.join(
+            self.benchmarker_config.lang_root, self.language
+        )
         self.test_dir = os.path.join(self.language_dir, self.name)
 
         if os.path.exists(self.test_dir):
@@ -343,35 +381,41 @@ class Scaffolding:
 
     def __edit_scaffold_files(self):
         for file in os.listdir(os.path.join(self.test_dir)):
+            self.__replace_text(os.path.join(self.test_dir, file), "\$NAME", self.name)
             self.__replace_text(
-                os.path.join(self.test_dir, file), "\$NAME", self.name)
+                os.path.join(self.test_dir, file), "\$DISPLAY_NAME", self.display_name
+            )
             self.__replace_text(
-                os.path.join(self.test_dir, file), "\$DISPLAY_NAME",
-                self.display_name)
+                os.path.join(self.test_dir, file), "\$APPROACH", self.approach
+            )
             self.__replace_text(
-                os.path.join(self.test_dir, file), "\$APPROACH", self.approach)
+                os.path.join(self.test_dir, file),
+                "\$CLASSIFICATION",
+                self.classification,
+            )
             self.__replace_text(
-                os.path.join(self.test_dir, file), "\$CLASSIFICATION",
-                self.classification)
+                os.path.join(self.test_dir, file), "\$FRAMEWORK", self.framework
+            )
             self.__replace_text(
-                os.path.join(self.test_dir, file), "\$FRAMEWORK",
-                self.framework)
+                os.path.join(self.test_dir, file), "\$LANGUAGE", self.language
+            )
             self.__replace_text(
-                os.path.join(self.test_dir, file), "\$LANGUAGE", self.language)
+                os.path.join(self.test_dir, file), "\$DATABASE", self.database
+            )
+            self.__replace_text(os.path.join(self.test_dir, file), "\$ORM", self.orm)
             self.__replace_text(
-                os.path.join(self.test_dir, file), "\$DATABASE", self.database)
+                os.path.join(self.test_dir, file), "\$PLATFORM", self.platform
+            )
             self.__replace_text(
-                os.path.join(self.test_dir, file), "\$ORM", self.orm)
+                os.path.join(self.test_dir, file), "\$WEBSERVER", self.webserver
+            )
             self.__replace_text(
-                os.path.join(self.test_dir, file), "\$PLATFORM", self.platform)
-            self.__replace_text(
-                os.path.join(self.test_dir, file), "\$WEBSERVER",
-                self.webserver)
-            self.__replace_text(
-                os.path.join(self.test_dir, file), "\$VERSUS", self.versus)
+                os.path.join(self.test_dir, file), "\$VERSUS", self.versus
+            )
 
     def __print_success(self):
-        print("""
+        print(
+            """
 -------------------------------------------------------------------------------
   Success!
 
@@ -387,7 +431,8 @@ class Scaffolding:
   The next step is to read through your README.md and follow the instructions
   provided therein.
 -------------------------------------------------------------------------------"""
-              % (self.language, self.name))
+            % (self.language, self.name)
+        )
 
     # Replaces all text found using the regular expression to_replace with the supplied replacement.
     def __replace_text(self, file, to_replace, replacement):

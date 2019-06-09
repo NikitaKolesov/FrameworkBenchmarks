@@ -3,7 +3,8 @@
 import sys
 
 import spyne.const
-spyne.const.MIN_GC_INTERVAL = float('inf')
+
+spyne.const.MIN_GC_INTERVAL = float("inf")
 
 from lxml import html
 
@@ -24,10 +25,10 @@ from spyne.server.wsgi import WsgiApplication
 if sys.version_info[0] == 3:
     xrange = range
 
-_is_pypy = hasattr(sys, 'pypy_version_info')
+_is_pypy = hasattr(sys, "pypy_version_info")
 
-DBDRIVER = 'postgresql+psycopg2cffi' if _is_pypy else 'postgresql+psycopg2'
-DBHOST = 'tfb-database'
+DBDRIVER = "postgresql+psycopg2cffi" if _is_pypy else "postgresql+psycopg2"
+DBHOST = "tfb-database"
 
 
 # models
@@ -50,12 +51,12 @@ class DbConnectionManager(object):
 class World(TableModel):
     __tablename__ = "world"
     _type_info = [
-        ('id', Integer32(primary_key=True)),
-        ('randomNumber', Integer32(sqla_column_args=dict(name='randomnumber'))),
+        ("id", Integer32(primary_key=True)),
+        ("randomNumber", Integer32(sqla_column_args=dict(name="randomnumber"))),
     ]
 
 
-T_INDEX = html.fromstring(open('cloths/index.html', 'rb').read())
+T_INDEX = html.fromstring(open("cloths/index.html", "rb").read())
 
 
 class Fortune(TableModel):
@@ -65,20 +66,20 @@ class Fortune(TableModel):
     message = Unicode
 
 
-outprot_plain = HttpRpc(mime_type='text/plain')
+outprot_plain = HttpRpc(mime_type="text/plain")
 
 
 class TfbSimpleService(ServiceBase):
     @rpc(_returns=Any)
     def json(ctx):
-        ctx.transport.add_header('Date', formatdate(usegmt=True))
-        return dict(message=u'Hello, World!')
+        ctx.transport.add_header("Date", formatdate(usegmt=True))
+        return dict(message=u"Hello, World!")
 
     @rpc(_returns=Any)
     def plaintext(ctx):
         """Test 6: Plaintext"""
         ctx.out_protocol = outprot_plain
-        return b'Hello, World!'
+        return b"Hello, World!"
 
 
 def _force_int(v):
@@ -105,7 +106,7 @@ class TfbOrmService(ServiceBase):
         q = ctx.udc.session.query(World)
         return [q.get(randint(1, 10000)) for _ in xrange(queries)]
 
-    @rpc(_returns=Array(Fortune, html_cloth=T_INDEX), _body_style='out_bare')
+    @rpc(_returns=Array(Fortune, html_cloth=T_INDEX), _body_style="out_bare")
     def fortunes(ctx):
         # This is normally specified at the application level as it's a good
         # practice to group rpc endpoints with similar return types under the
@@ -148,8 +149,8 @@ class TfbRawService(ServiceBase):
 
         wid = randint(1, 10000)
         return conn.execute(
-                     "SELECT id, randomNumber FROM world WHERE id = %s", wid) \
-                                                                     .fetchone()
+            "SELECT id, randomNumber FROM world WHERE id = %s", wid
+        ).fetchone()
 
     # returning both Any+dict or ObjectMarker+ListOfLists works
     @rpc(NumQueriesType, _returns=Any)
@@ -162,13 +163,13 @@ class TfbRawService(ServiceBase):
         for i in xrange(queries):
             wid = randint(1, 10000)
             result = conn.execute(
-                     "SELECT id, randomNumber FROM world WHERE id = %s", wid) \
-                .fetchone()
+                "SELECT id, randomNumber FROM world WHERE id = %s", wid
+            ).fetchone()
             retval.append(dict(id=result[0], randomNumber=result[1]))
 
         return retval
 
-    @rpc(_returns=Array(Fortune, html_cloth=T_INDEX), _body_style='out_bare')
+    @rpc(_returns=Array(Fortune, html_cloth=T_INDEX), _body_style="out_bare")
     def fortunesraw(ctx):
         # This is normally specified at the application level as it's a good
         # practice to group rpc endpoints with similar return types under the
@@ -179,10 +180,9 @@ class TfbRawService(ServiceBase):
         res = ctx.udc.conn.execute("SELECT id, message FROM fortune")
         fortunes = res.fetchall()
 
-        fortunes.append(Fortune(
-            id=0,
-            message=u"Additional fortune added at request time."
-        ))
+        fortunes.append(
+            Fortune(id=0, message=u"Additional fortune added at request time.")
+        )
 
         fortunes.sort(key=lambda x: x.message)
 
@@ -201,25 +201,24 @@ class TfbRawService(ServiceBase):
         retval = []
         for i in ids:
             wid, rn = conn.execute(
-                         "SELECT id, randomNumber FROM world WHERE id=%s", i) \
-                .fetchone()
+                "SELECT id, randomNumber FROM world WHERE id=%s", i
+            ).fetchone()
 
             rn = randint(1, 10000)
             retval.append(dict(id=wid, randomNumber=rn))
 
-            conn.execute("UPDATE World SET randomNumber=%s WHERE id=%s",
-                                                                        rn, wid)
+            conn.execute("UPDATE World SET randomNumber=%s WHERE id=%s", rn, wid)
 
         return retval
 
 
 def _on_method_call_db_sess(ctx):
-    ctx.transport.add_header('Date', formatdate(usegmt=True))
+    ctx.transport.add_header("Date", formatdate(usegmt=True))
     ctx.udc = DbSessionManager(ctx.app.config)
 
 
 def _on_method_call_db_conn(ctx):
-    ctx.transport.add_header('Date', formatdate(usegmt=True))
+    ctx.transport.add_header("Date", formatdate(usegmt=True))
     ctx.udc = DbConnectionManager(ctx.app.config)
 
 
@@ -228,11 +227,11 @@ TfbOrmService.event_manager.add_listener("method_call", _on_method_call_db_sess)
 
 
 def init_app(config):
-    subconfig = config.services['root']
+    subconfig = config.services["root"]
 
     app = Application(
         [TfbOrmService, TfbRawService, TfbSimpleService],
-        tns='http://techempower.com/benchmarks/Python/Spyne',
+        tns="http://techempower.com/benchmarks/Python/Spyne",
         in_protocol=HttpRpc(),
         out_protocol=JsonDocument(),
         config=config,
@@ -240,28 +239,23 @@ def init_app(config):
     if subconfig.subapps is None:
         subconfig.subapps = {}
 
-    subconfig.subapps.update({'': app})
+    subconfig.subapps.update({"": app})
 
     return subconfig.gen_site()
 
 
 def init(config):
     return {
-        'root': ServiceDefinition(
-            init=init_app,
-            default=HttpServer(
-                type='tcp4',
-                host='127.0.0.1',
-                port=8080,
-            ),
-        ),
+        "root": ServiceDefinition(
+            init=init_app, default=HttpServer(type="tcp4", host="127.0.0.1", port=8080)
+        )
     }
 
 
 def parse_config(argv):
     from neurons.daemon.main import boot
 
-    retcode, config = boot('tfb', argv, init, bootstrapper=TfbBootstrap)
+    retcode, config = boot("tfb", argv, init, bootstrapper=TfbBootstrap)
 
     if retcode is not None:
         sys.exit(retcode)
@@ -271,11 +265,11 @@ def parse_config(argv):
 
 def gen_wsgi_app():
     config = parse_config([])
-    app = config.services['root'].subapps[''].app
+    app = config.services["root"].subapps[""].app
     return WsgiApplication(app)
 
 
-words = 'some random words for you and me somebody else if then the'.split()
+words = "some random words for you and me somebody else if then the".split()
 
 
 class TfbBootstrap(Bootstrapper):
@@ -289,15 +283,16 @@ class TfbBootstrap(Bootstrapper):
                 session.add(World(randomNumber=ints.pop()))
 
             for _ in range(100):
-                session.add(Fortune(
-                    message=' '.join([choice(words)
-                                                for _ in range(randint(3, 10))])
-                ))
+                session.add(
+                    Fortune(
+                        message=" ".join([choice(words) for _ in range(randint(3, 10))])
+                    )
+                )
 
             session.commit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parse_config(sys.argv)
 else:
     application = gen_wsgi_app()

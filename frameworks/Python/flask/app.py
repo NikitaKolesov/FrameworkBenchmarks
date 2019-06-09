@@ -16,25 +16,33 @@ from sqlalchemy.ext import baked
 if sys.version_info[0] == 3:
     xrange = range
 
-_is_pypy = hasattr(sys, 'pypy_version_info')
+_is_pypy = hasattr(sys, "pypy_version_info")
 
-DBDRIVER = 'mysql+pymysql' if _is_pypy else 'mysql'  # mysqlclient is slow on PyPy
-DBHOST = 'tfb-database'
+DBDRIVER = "mysql+pymysql" if _is_pypy else "mysql"  # mysqlclient is slow on PyPy
+DBHOST = "tfb-database"
 
 
 # setup
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = DBDRIVER + '://benchmarkdbuser:benchmarkdbpass@%s:3306/hello_world?charset=utf8' % DBHOST
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    DBDRIVER
+    + "://benchmarkdbuser:benchmarkdbpass@%s:3306/hello_world?charset=utf8" % DBHOST
+)
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["JSONIFY_PRETTYPRINT_REGULAR"] = False
 db = SQLAlchemy(app)
-dbraw_engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], connect_args={'autocommit': True}, pool_reset_on_return=None)
+dbraw_engine = create_engine(
+    app.config["SQLALCHEMY_DATABASE_URI"],
+    connect_args={"autocommit": True},
+    pool_reset_on_return=None,
+)
 
 bakery = baked.bakery()
 
 
 # models
+
 
 class World(db.Model):
     __tablename__ = "world"
@@ -45,10 +53,7 @@ class World(db.Model):
     @property
     def serialize(self):
         """Return object data in easily serializeable format"""
-        return {
-            'id'         : self.id,
-            'randomNumber': self.randomNumber
-        }
+        return {"id": self.id, "randomNumber": self.randomNumber}
 
     @staticmethod
     def get(ident):
@@ -73,13 +78,13 @@ def json_response(obj):
 
 
 def add_date_header(res):
-    res.headers['Date'] = formatdate(timeval=None, localtime=False, usegmt=True)
+    res.headers["Date"] = formatdate(timeval=None, localtime=False, usegmt=True)
     return res
 
 
 @app.route("/json")
 def hello():
-    return add_date_header(jsonify(message='Hello, World!'))
+    return add_date_header(jsonify(message="Hello, World!"))
 
 
 @app.route("/db")
@@ -89,8 +94,7 @@ def get_random_world():
         num_queries = 1
     if num_queries > 500:
         num_queries = 500
-    worlds = [World.get(randint(1, 10000)).serialize
-              for _ in xrange(num_queries)]
+    worlds = [World.get(randint(1, 10000)).serialize for _ in xrange(num_queries)]
     return json_response(worlds)
 
 
@@ -112,8 +116,10 @@ def get_random_world_raw():
     worlds = []
     for i in xrange(num_queries):
         wid = randint(1, 10000)
-        result = connection.execute("SELECT * FROM world WHERE id = " + str(wid)).fetchone()
-        worlds.append({'id': result[0], 'randomNumber': result[1]})
+        result = connection.execute(
+            "SELECT * FROM world WHERE id = " + str(wid)
+        ).fetchone()
+        worlds.append({"id": result[0], "randomNumber": result[1]})
     connection.close()
     return json_response(worlds)
 
@@ -123,16 +129,20 @@ def get_random_world_single_raw():
     connection = dbraw_engine.connect()
     wid = randint(1, 10000)
     result = connection.execute("SELECT * FROM world WHERE id = " + str(wid)).fetchone()
-    worlds = {'id': result[0], 'randomNumber': result[1]}
+    worlds = {"id": result[0], "randomNumber": result[1]}
     connection.close()
     return json_response(worlds)
+
 
 @app.route("/fortunes")
 def get_fortunes():
     fortunes = list(Fortune.query.all())
     fortunes.append(Fortune(id=0, message="Additional fortune added at request time."))
-    fortunes.sort(key=attrgetter('message'))
-    return add_date_header(make_response(render_template('fortunes.html', fortunes=fortunes)))
+    fortunes.sort(key=attrgetter("message"))
+    return add_date_header(
+        make_response(render_template("fortunes.html", fortunes=fortunes))
+    )
+
 
 @app.route("/fortunesraw")
 def get_fortunes_raw():
@@ -140,14 +150,16 @@ def get_fortunes_raw():
     fortunes = res.fetchall()
     res.close()
     fortunes.append(Fortune(id=0, message="Additional fortune added at request time."))
-    fortunes.sort(key=attrgetter('message'))
-    return add_date_header(make_response(render_template('fortunes.html', fortunes=fortunes)))
+    fortunes.sort(key=attrgetter("message"))
+    return add_date_header(
+        make_response(render_template("fortunes.html", fortunes=fortunes))
+    )
 
 
 @app.route("/updates")
 def updates():
     """Test 5: Database Updates"""
-    num_queries = request.args.get('queries', 1, type=int)
+    num_queries = request.args.get("queries", 1, type=int)
     if num_queries < 1:
         num_queries = 1
     if num_queries > 500:
@@ -171,7 +183,7 @@ def raw_updates():
     """Test 5: Database Updates"""
     connection = dbraw_engine.connect()
     try:
-        num_queries = request.args.get('queries', 1, type=int)
+        num_queries = request.args.get("queries", 1, type=int)
         if num_queries < 1:
             num_queries = 1
         if num_queries > 500:
@@ -180,25 +192,31 @@ def raw_updates():
         worlds = []
         rp = partial(randint, 1, 10000)
         for i in xrange(num_queries):
-            world = connection.execute("SELECT * FROM world WHERE id=%s", (rp(),)).fetchone()
+            world = connection.execute(
+                "SELECT * FROM world WHERE id=%s", (rp(),)
+            ).fetchone()
             randomNumber = rp()
-            worlds.append({'id': world['id'], 'randomNumber': randomNumber})
-            connection.execute("UPDATE World SET randomNumber=%s WHERE id=%s", (randomNumber, world['id']))
+            worlds.append({"id": world["id"], "randomNumber": randomNumber})
+            connection.execute(
+                "UPDATE World SET randomNumber=%s WHERE id=%s",
+                (randomNumber, world["id"]),
+            )
         return json_response(worlds)
     finally:
         connection.close()
 
 
-@app.route('/plaintext')
+@app.route("/plaintext")
 def plaintext():
     """Test 6: Plaintext"""
-    response = make_response(b'Hello, World!')
-    response.content_type = 'text/plain'
+    response = make_response(b"Hello, World!")
+    response.content_type = "text/plain"
     return add_date_header(response)
 
 
 try:
     import meinheld
+
     meinheld.server.set_access_logger(None)
     meinheld.set_keepalive(120)
 except ImportError:

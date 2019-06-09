@@ -7,22 +7,22 @@ import time
 
 class BenchmarkConfig:
     def __init__(self, args):
-        '''
+        """
         Configures this BenchmarkConfig given the arguments provided.
-        '''
+        """
 
         # Map type strings to their objects
         types = dict()
-        types['json'] = JsonTestType(self)
-        types['db'] = DBTestType(self)
-        types['query'] = QueryTestType(self)
-        types['fortune'] = FortuneTestType(self)
-        types['update'] = UpdateTestType(self)
-        types['plaintext'] = PlaintextTestType(self)
-        types['cached_query'] = CachedQueryTestType(self)
+        types["json"] = JsonTestType(self)
+        types["db"] = DBTestType(self)
+        types["query"] = QueryTestType(self)
+        types["fortune"] = FortuneTestType(self)
+        types["update"] = UpdateTestType(self)
+        types["plaintext"] = PlaintextTestType(self)
+        types["cached_query"] = CachedQueryTestType(self)
 
         # Turn type into a map instead of a list of strings
-        if 'all' in args.type:
+        if "all" in args.type:
             self.types = types
         else:
             self.types = {t: types[t] for t in args.type}
@@ -57,7 +57,7 @@ class BenchmarkConfig:
         self.network = None
 
         if self.network_mode is None:
-            self.network = 'tfb'
+            self.network = "tfb"
             self.server_docker_host = "unix://var/run/docker.sock"
             self.database_docker_host = "unix://var/run/docker.sock"
             self.client_docker_host = "unix://var/run/docker.sock"
@@ -75,14 +75,14 @@ class BenchmarkConfig:
         self.start_time = time.time()
 
         # Remember directories
-        self.fw_root = os.getenv('FWROOT')
+        self.fw_root = os.getenv("FWROOT")
         self.db_root = os.path.join(self.fw_root, "toolset", "databases")
         self.lang_root = os.path.join(self.fw_root, "frameworks")
         self.results_root = os.path.join(self.fw_root, "results")
         self.wrk_root = os.path.join(self.fw_root, "toolset", "wrk")
         self.scaffold_root = os.path.join(self.fw_root, "toolset", "scaffolding")
 
-        if hasattr(self, 'parse') and self.parse is not None:
+        if hasattr(self, "parse") and self.parse is not None:
             self.timestamp = self.parse
         else:
             self.timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())

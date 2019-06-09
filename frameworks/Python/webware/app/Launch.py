@@ -8,7 +8,7 @@ import os
 
 workDir = None
 webwareDir = os.path.dirname(os.path.normpath(os.getcwd()))
-libraryDirs = ['Lib']
+libraryDirs = ["Lib"]
 runProfile = False
 logFile = None
 pidFile = None
@@ -16,6 +16,7 @@ user = None
 group = None
 
 import sys
+
 sys.path.insert(0, webwareDir)
 
 from WebKit import Launch
@@ -29,5 +30,5 @@ Launch.pidFile = pidFile
 Launch.user = user
 Launch.group = group
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     Launch.main()

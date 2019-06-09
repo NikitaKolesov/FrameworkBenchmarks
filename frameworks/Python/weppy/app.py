@@ -6,11 +6,11 @@ from weppy.orm import Database, Model, Field, rowmethod
 from weppy.tools import service
 from email.utils import formatdate
 
-_is_pypy = hasattr(sys, 'pypy_version_info')
+_is_pypy = hasattr(sys, "pypy_version_info")
 if sys.version_info[0] == 3:
     xrange = range
 
-DBHOSTNAME = 'tfb-database'
+DBHOSTNAME = "tfb-database"
 
 app = App(__name__)
 
@@ -19,32 +19,33 @@ class World(Model):
     tablename = "world"
     randomnumber = Field.int()
 
-    @rowmethod('serialize')
+    @rowmethod("serialize")
     def _serialize(self, row):
-        return {'id': row.id, 'randomNumber': row.randomnumber}
+        return {"id": row.id, "randomNumber": row.randomnumber}
 
 
 class Fortune(Model):
     tablename = "fortune"
     message = Field.string()
 
-    @rowmethod('serialize')
+    @rowmethod("serialize")
     def _serialize(self, row):
-        return {'id': row.id, 'message': row.message}
+        return {"id": row.id, "message": row.message}
 
 
 class DateHeaderPipe(Pipe):
     def open(self):
-        response.headers["Date"] = formatdate(timeval=None, localtime=False, usegmt=True)
+        response.headers["Date"] = formatdate(
+            timeval=None, localtime=False, usegmt=True
+        )
 
 
 app.config.handle_static = False
-app.config.db.adapter = 'postgres:psycopg2' \
-    if not _is_pypy else 'postgres:pg8000'
+app.config.db.adapter = "postgres:psycopg2" if not _is_pypy else "postgres:pg8000"
 app.config.db.host = DBHOSTNAME
-app.config.db.user = 'benchmarkdbuser'
-app.config.db.password = 'benchmarkdbpass'
-app.config.db.database = 'hello_world'
+app.config.db.user = "benchmarkdbuser"
+app.config.db.password = "benchmarkdbpass"
+app.config.db.database = "hello_world"
 app.config.db.pool_size = 100
 
 app.pipeline = [DateHeaderPipe()]
@@ -56,7 +57,7 @@ db.define_models(World, Fortune)
 @app.route()
 @service.json
 def json():
-    return {'message': 'Hello, World!'}
+    return {"message": "Hello, World!"}
 
 
 @app.route("/db", pipeline=[db.pipe])
@@ -81,8 +82,7 @@ def get_qparam():
 @service.json
 def get_random_worlds():
     num_queries = get_qparam()
-    worlds = [
-        World.get(randint(1, 10000)).serialize() for _ in xrange(num_queries)]
+    worlds = [World.get(randint(1, 10000)).serialize() for _ in xrange(num_queries)]
     return worlds
 
 
@@ -90,9 +90,10 @@ def get_random_worlds():
 def fortunes():
     fortunes = Fortune.all().select()
     fortunes.append(
-        Fortune.new(id=0, message="Additional fortune added at request time."))
+        Fortune.new(id=0, message="Additional fortune added at request time.")
+    )
     fortunes.sort(lambda m: m.message)
-    return {'fortunes': fortunes}
+    return {"fortunes": fortunes}
 
 
 @app.route(pipeline=[db.pipe])
@@ -113,11 +114,12 @@ def updates():
 @app.route()
 def plaintext():
     response.headers["Content-Type"] = "text/plain"
-    return 'Hello, World!'
+    return "Hello, World!"
 
 
 try:
     import meinheld
+
     meinheld.server.set_access_logger(None)
     meinheld.set_keepalive(120)
 except ImportError:

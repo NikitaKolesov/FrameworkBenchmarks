@@ -15,10 +15,11 @@ class PlainHandler(BaseHandler):
     def set_default_headers(self):
         self.set_header("Content-Type", "text/plain")
 
-class HtmlHandler(BaseHandler):
 
+class HtmlHandler(BaseHandler):
     def set_default_headers(self):
         self.set_header("Content-Type", "text/html; charset=UTF-8")
+
 
 class JsonHandler(BaseHandler):
     def set_default_headers(self):

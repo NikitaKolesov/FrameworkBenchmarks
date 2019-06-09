@@ -2,8 +2,8 @@ import multiprocessing
 import os
 import sys
 
-_is_pypy = hasattr(sys, 'pypy_version_info')
-_is_travis = os.environ.get('TRAVIS') == 'true'
+_is_pypy = hasattr(sys, "pypy_version_info")
+_is_travis = os.environ.get("TRAVIS") == "true"
 
 workers = multiprocessing.cpu_count() * 3
 if _is_travis:
@@ -11,8 +11,8 @@ if _is_travis:
 
 bind = "0.0.0.0:8080"
 keepalive = 120
-errorlog = '-'
-pidfile = 'gunicorn.pid'
+errorlog = "-"
+pidfile = "gunicorn.pid"
 
 if _is_pypy:
     worker_class = "tornado"
@@ -23,4 +23,5 @@ else:
         # Disable access log.
         # (Until https://github.com/mopemope/meinheld/pull/42 is released)
         import meinheld.server
+
         meinheld.server.set_access_logger(None)

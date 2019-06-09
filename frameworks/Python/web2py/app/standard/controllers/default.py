@@ -5,9 +5,10 @@
 import controller
 from gluon import current
 
-current.optimized = False # Flag used in controller.py to trigger DAL optimizations.
+current.optimized = False  # Flag used in controller.py to trigger DAL optimizations.
 
-session.forget(response) # For speed-up when sessions are not needed.
+session.forget(response)  # For speed-up when sessions are not needed.
+
 
 def index():
     # The first URL arg specifies the controller function to be executed

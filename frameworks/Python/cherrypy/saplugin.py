@@ -3,8 +3,9 @@ from cherrypy.process import wspbus, plugins
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-__all__ = ['SAEnginePlugin']
-        
+__all__ = ["SAEnginePlugin"]
+
+
 class SAEnginePlugin(plugins.SimplePlugin):
     def __init__(self, bus, connection_string=None):
         """
@@ -18,23 +19,22 @@ class SAEnginePlugin(plugins.SimplePlugin):
         plugins.SimplePlugin.__init__(self, bus)
         self.sa_engine = None
         self.connection_string = connection_string
-        self.session = scoped_session(sessionmaker(autoflush=True,
-                                                   autocommit=False))
- 
+        self.session = scoped_session(sessionmaker(autoflush=True, autocommit=False))
+
     def start(self):
-        self.bus.log('Starting up DB access')
+        self.bus.log("Starting up DB access")
         self.sa_engine = create_engine(self.connection_string, echo=False)
         self.bus.subscribe("bind-session", self.bind)
         self.bus.subscribe("commit-session", self.commit)
- 
+
     def stop(self):
-        self.bus.log('Stopping down DB access')
+        self.bus.log("Stopping down DB access")
         self.bus.unsubscribe("bind-session", self.bind)
         self.bus.unsubscribe("commit-session", self.commit)
         if self.sa_engine:
             self.sa_engine.dispose()
             self.sa_engine = None
- 
+
     def bind(self):
         """
         Whenever this plugin receives the 'bind-session' command, it applies
@@ -55,7 +55,7 @@ class SAEnginePlugin(plugins.SimplePlugin):
         try:
             self.session.commit()
         except:
-            self.session.rollback()  
+            self.session.rollback()
             raise
         finally:
             self.session.remove()

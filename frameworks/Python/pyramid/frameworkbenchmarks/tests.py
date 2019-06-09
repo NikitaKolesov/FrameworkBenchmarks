@@ -4,41 +4,44 @@ import unittest
 import json
 import sys
 
+
 class FunctionalTests(unittest.TestCase):
     def setUp(self):
         from frameworkbenchmarks import main
+
         app = main({})
         from webtest import TestApp
+
         self.testapp = TestApp(app)
         self.py3k = sys.version_info >= (3, 0)
 
-    def _get(self, url, content_type='application/json'):
+    def _get(self, url, content_type="application/json"):
         res = self.testapp.get(url, status=200)
-        self.assertTrue('Content-Length' in res.headers)
+        self.assertTrue("Content-Length" in res.headers)
         return res
 
     def _str_compat(self, obj):
         if self.py3k:
-            return obj.decode('utf-8')
+            return obj.decode("utf-8")
         return obj
 
     def _test_obj(self, obj):
-        self.assertTrue('id' in obj)
-        self.assertTrue('randomNumber' in obj)
-        self.assertTrue(1 <= obj['randomNumber'] <= 10000)
+        self.assertTrue("id" in obj)
+        self.assertTrue("randomNumber" in obj)
+        self.assertTrue(1 <= obj["randomNumber"] <= 10000)
 
     def test_json(self):
         """
         /json
         """
-        res = self._get('/json')
+        res = self._get("/json")
         self.assertEqual(self._str_compat(res.body), """{"message": "Hello, World!"}""")
 
     def test_db(self):
         """
         /db
         """
-        res = self._get('/db')
+        res = self._get("/db")
         obj = json.loads(self._str_compat(res.body))
         self._test_obj(obj)
 
@@ -46,21 +49,21 @@ class FunctionalTests(unittest.TestCase):
         """
         /queries?queries=0
         """
-        res = self._get('/queries?queries=0')
+        res = self._get("/queries?queries=0")
         self.assertEqual(len(json.loads(self._str_compat(res.body))), 1)
 
     def test_queries_999(self):
         """
         /queries?queries=999
         """
-        res = self._get('/queries?queries=999')
+        res = self._get("/queries?queries=999")
         self.assertEqual(len(json.loads(self._str_compat(res.body))), 500)
 
     def test_queries_10(self):
         """
         /queries?queries=10 objects
         """
-        res = self._get('/queries?queries=10')
+        res = self._get("/queries?queries=10")
         objset = json.loads(self._str_compat(res.body))
         for obj in objset:
             self._test_obj(obj)
@@ -69,14 +72,14 @@ class FunctionalTests(unittest.TestCase):
         """
         /fortunes
         """
-        res = self._get('/fortunes')
+        res = self._get("/fortunes")
         self.assertEqual(self._str_compat(res.body).strip(), fortunes.strip())
 
     def test_updates(self):
         """
         /updates?queries=10
         """
-        res = self._get('/updates?queries=10')
+        res = self._get("/updates?queries=10")
         objset = json.loads(self._str_compat(res.body))
         # don't bother with more...
         for obj in objset:
@@ -86,7 +89,7 @@ class FunctionalTests(unittest.TestCase):
         """
         /plaintext
         """
-        res = self._get('/plaintext', content_type='text/plain')
+        res = self._get("/plaintext", content_type="text/plain")
         self.assertEqual(self._str_compat(res.body), "Hello, World!")
 
 

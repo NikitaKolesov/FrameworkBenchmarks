@@ -1,7 +1,7 @@
 import multiprocessing
 import os
 
-_is_travis = os.environ.get('TRAVIS') == 'true'
+_is_travis = os.environ.get("TRAVIS") == "true"
 
 workers = multiprocessing.cpu_count()
 if _is_travis:
@@ -9,6 +9,6 @@ if _is_travis:
 
 bind = "0.0.0.0:8080"
 keepalive = 120
-errorlog = '-'
-pidfile = '/tmp/uvicorn.pid'
-loglevel = 'error'
+errorlog = "-"
+pidfile = "/tmp/uvicorn.pid"
+loglevel = "error"

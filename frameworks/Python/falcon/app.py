@@ -7,18 +7,24 @@ from email.utils import formatdate
 
 # resource endpoints
 
+
 class JSONResource(object):
     def on_get(self, request, response):
-        response.set_header('Date', formatdate(timeval=None, localtime=False, usegmt=True))
-        json_data = {'message': "Hello, world!"}
+        response.set_header(
+            "Date", formatdate(timeval=None, localtime=False, usegmt=True)
+        )
+        json_data = {"message": "Hello, world!"}
         response.body = json.dumps(json_data)
 
 
 class PlaintextResource(object):
     def on_get(self, request, response):
-        response.set_header('Date', formatdate(timeval=None, localtime=False, usegmt=True))
-        response.set_header('Content-Type', 'text/plain')
-        response.body = b'Hello, world!'
+        response.set_header(
+            "Date", formatdate(timeval=None, localtime=False, usegmt=True)
+        )
+        response.set_header("Content-Type", "text/plain")
+        response.body = b"Hello, world!"
+
 
 # setup
 
@@ -30,5 +36,5 @@ app.add_route("/plaintext", PlaintextResource())
 if __name__ == "__main__":
     from wsgiref import simple_server
 
-    httpd = simple_server.make_server('localhost', 8080, app)
+    httpd = simple_server.make_server("localhost", 8080, app)
     httpd.serve_forever()

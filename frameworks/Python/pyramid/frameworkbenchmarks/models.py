@@ -14,16 +14,17 @@ from sqlalchemy.ext.declarative import declarative_base, DeclarativeMeta
 
 def get_conn():
     return psycopg2.connect(
-        user='benchmarkdbuser',
-        password='benchmarkdbpass',
-        host='tfb-database',
-        port='5432',
-        database='hello_world')
+        user="benchmarkdbuser",
+        password="benchmarkdbpass",
+        host="tfb-database",
+        port="5432",
+        database="hello_world",
+    )
 
 
 conn_pool = QueuePool(get_conn, pool_size=100, max_overflow=25, echo=False)
 
-pg = create_engine('postgresql://', pool=conn_pool)
+pg = create_engine("postgresql://", pool=conn_pool)
 DBSession = sessionmaker(bind=pg)()
 metadata = MetaData()
 
@@ -48,21 +49,20 @@ class SQLAlchemyEncoder(json.JSONEncoder):
 
 
 class World(DatabaseBase):
-    __tablename__ = 'world'
+    __tablename__ = "world"
 
-    id = Column('id', Integer, primary_key=True)
-    randomNumber = Column(
-        'randomnumber', Integer, nullable=False, server_default='0')
+    id = Column("id", Integer, primary_key=True)
+    randomNumber = Column("randomnumber", Integer, nullable=False, server_default="0")
 
     def __json__(self):
-        return {'id': self.id, 'randomNumber': self.randomNumber}
+        return {"id": self.id, "randomNumber": self.randomNumber}
 
 
 class Fortune(DatabaseBase):
-    __tablename__ = 'fortune'
+    __tablename__ = "fortune"
 
-    id = Column('id', Integer, primary_key=True)
-    message = Column('message', String, nullable=False)
+    id = Column("id", Integer, primary_key=True)
+    message = Column("message", String, nullable=False)
 
     def __json__(self):
-        return {'id': self.id, 'message': self.message}
+        return {"id": self.id, "message": self.message}

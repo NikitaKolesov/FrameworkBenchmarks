@@ -13,11 +13,11 @@ import tornado.web
 import tornado.httpserver
 from tornado.options import options
 
-options.define('port', default=8080, type=int, help="Server port")
+options.define("port", default=8080, type=int, help="Server port")
 
 READ_ROW_SQL = 'SELECT "randomnumber" FROM "world" WHERE id = $1'
 WRITE_ROW_SQL = 'UPDATE "world" SET "randomnumber"=$1 WHERE id=$2'
-ADDITIONAL_ROW = [0, 'Additional fortune added at request time.']
+ADDITIONAL_ROW = [0, "Additional fortune added at request time."]
 
 sort_fortunes_key = itemgetter(1)
 
@@ -27,12 +27,13 @@ async def init_db_pool():
         host="tfb-database",
         user="benchmarkdbuser",
         password="benchmarkdbpass",
-        database="hello_world")
+        database="hello_world",
+    )
 
 
 def get_num_queries(request):
     try:
-        query_count = int(request.get_query_argument('queries'))
+        query_count = int(request.get_query_argument("queries"))
     except (KeyError, IndexError, ValueError):
         return 1
 
@@ -59,7 +60,7 @@ class JsonHelloWorldHandler(JsonHandler):
 class PlaintextHelloWorldHandler(tornado.web.RequestHandler):
     def get(self):
         self.set_header("Content-Type", "text/plain")
-        self.write(b'Hello, world!')
+        self.write(b"Hello, world!")
 
 
 class SingleQueryHandler(JsonHandler):
@@ -68,7 +69,7 @@ class SingleQueryHandler(JsonHandler):
         async with self.application.pool.acquire() as connection:
             number = await connection.fetchval(READ_ROW_SQL, row_id)
 
-        self.write_response({'id': row_id, 'randomNumber': number})
+        self.write_response({"id": row_id, "randomNumber": number})
 
 
 class MultipleQueriesHandler(JsonHandler):
@@ -81,7 +82,7 @@ class MultipleQueriesHandler(JsonHandler):
             statement = await connection.prepare(READ_ROW_SQL)
             for row_id in row_ids:
                 number = await statement.fetchval(row_id)
-                worlds.append({'id': row_id, 'randomNumber': number})
+                worlds.append({"id": row_id, "randomNumber": number})
         self.write_response(worlds)
 
 
@@ -89,7 +90,7 @@ class UpdateHandler(JsonHandler):
     async def get(self):
         num_queries = get_num_queries(self)
         updates = [(randint(1, 10000), randint(1, 10000)) for _ in range(num_queries)]
-        worlds = [{'id': row_id, 'randomNumber': number} for row_id, number in updates]
+        worlds = [{"id": row_id, "randomNumber": number} for row_id, number in updates]
 
         async with self.application.pool.acquire() as connection:
             statement = await connection.prepare(READ_ROW_SQL)
@@ -103,36 +104,38 @@ class UpdateHandler(JsonHandler):
 class FortuneHandler(tornado.web.RequestHandler):
     async def get(self):
         async with self.application.pool.acquire() as connection:
-            fortunes = await connection.fetch('SELECT * FROM Fortune')
+            fortunes = await connection.fetch("SELECT * FROM Fortune")
 
         fortunes.append(ADDITIONAL_ROW)
         fortunes.sort(key=sort_fortunes_key)
 
         self.set_header("Content-Type", "text/html; charset=UTF-8")
-        self.render('fortunes_asyncpg.html', fortunes=fortunes)
+        self.render("fortunes_asyncpg.html", fortunes=fortunes)
 
 
 def make_app():
-    return tornado.web.Application([
-        (r"/json", JsonHelloWorldHandler),
-        (r"/plaintext", PlaintextHelloWorldHandler),
-        (r"/db", SingleQueryHandler),
-        (r"/queries", MultipleQueriesHandler),
-        (r"/updates", UpdateHandler),
-        (r"/fortunes", FortuneHandler),
-    ],
-        template_path="templates"
+    return tornado.web.Application(
+        [
+            (r"/json", JsonHelloWorldHandler),
+            (r"/plaintext", PlaintextHelloWorldHandler),
+            (r"/db", SingleQueryHandler),
+            (r"/queries", MultipleQueriesHandler),
+            (r"/updates", UpdateHandler),
+            (r"/fortunes", FortuneHandler),
+        ],
+        template_path="templates",
     )
 
 
 async def setup_database():
     return await asyncpg.create_pool(
-        user=getenv('PGUSER', 'benchmarkdbuser'),
-        password=getenv('PGPASS', 'benchmarkdbpass'),
-        database='hello_world',
-        host='tfb-database',
-        port=5432
+        user=getenv("PGUSER", "benchmarkdbuser"),
+        password=getenv("PGPASS", "benchmarkdbpass"),
+        database="hello_world",
+        host="tfb-database",
+        port=5432,
     )
+
 
 if __name__ == "__main__":
     options.parse_command_line()

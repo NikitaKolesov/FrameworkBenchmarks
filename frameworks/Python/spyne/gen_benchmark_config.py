@@ -26,10 +26,14 @@ class BenchmarkConfigElement(ComplexModel):
 
     port = M(UnsignedInteger16(default=8080))
 
-    approach = M(Unicode(values=['Realistic', 'Stripped'], default='Realistic'))
-    classification = M(Unicode(values=['Micro', 'Fullstack', 'Platform'], default='Micro'))
-    database = M(Unicode(values=['none', 'mongodb', 'postgres', 'mysql'], default='none'))
-    orm = M(Unicode(values=['Full', 'Micro', 'None', 'Raw']))
+    approach = M(Unicode(values=["Realistic", "Stripped"], default="Realistic"))
+    classification = M(
+        Unicode(values=["Micro", "Fullstack", "Platform"], default="Micro")
+    )
+    database = M(
+        Unicode(values=["none", "mongodb", "postgres", "mysql"], default="none")
+    )
+    orm = M(Unicode(values=["Full", "Micro", "None", "Raw"]))
 
     framework = M(Unicode)
     language = M(Unicode)
@@ -37,10 +41,10 @@ class BenchmarkConfigElement(ComplexModel):
     platform = M(Unicode)
     webserver = M(Unicode)
 
-    os = M(Unicode(default='Linux'))
-    database_os = M(Unicode(default='Linux'))
-    
-    
+    os = M(Unicode(default="Linux"))
+    database_os = M(Unicode(default="Linux"))
+
+
 class BenchmarkConfig(ComplexModel):
     framework = M(Unicode)
     tests = Array(BenchmarkConfigElement, wrapped=False)
@@ -52,7 +56,7 @@ gen_raw_test = lambda: BenchmarkConfigElement(
     query_url="/dbraw?queries=",
     fortune_url="/fortunesraw",
     update_url="/raw-updates?queries=",
-    orm='Raw',
+    orm="Raw",
 )
 
 gen_normal_test = lambda: BenchmarkConfigElement(
@@ -61,7 +65,7 @@ gen_normal_test = lambda: BenchmarkConfigElement(
     query_url="/db?queries=",
     fortune_url="/fortunes",
     update_url="/updatesraw?queries=",
-    orm='Full',
+    orm="Full",
 )
 
 
@@ -81,11 +85,11 @@ def add_common(bc):
     return bc
 
 
-config = BenchmarkConfig(framework='spyne', tests=[])
+config = BenchmarkConfig(framework="spyne", tests=[])
 
-keys = iter(['default', 'raw', 'py3orm', 'py3raw'])
+keys = iter(["default", "raw", "py3orm", "py3raw"])
 
-for flav in ['CPython', 'Python3']:
+for flav in ["CPython", "Python3"]:
     bc = add_common(gen_normal_test())
     bc.flavor = flav
     bc.key = next(keys)
@@ -97,11 +101,11 @@ for flav in ['CPython', 'Python3']:
     config.tests.append(bc)
 
 data = get_object_as_dict(config, complex_as=dict)
-data['tests'] = [{d['key']: d} for d in data['tests']]
+data["tests"] = [{d["key"]: d} for d in data["tests"]]
 
-data = json.dumps(data, indent=2, sort_keys=True, separators=(',', ': '))
+data = json.dumps(data, indent=2, sort_keys=True, separators=(",", ": "))
 
-open('benchmark_config.json', 'wb').write(data)
+open("benchmark_config.json", "wb").write(data)
 
 
 print(data)

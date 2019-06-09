@@ -8,4 +8,4 @@ class App(PonyApp, Jinja2App):
 
 @App.template_directory()
 def get_template_directory():
-    return 'templates'
+    return "templates"

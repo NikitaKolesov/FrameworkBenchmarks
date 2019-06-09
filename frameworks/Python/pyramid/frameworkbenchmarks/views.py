@@ -9,15 +9,15 @@ from pyramid.response import Response
 from frameworkbenchmarks.models import DBSession, World, Fortune
 
 
-@view_config(route_name='test_1', renderer='json')
+@view_config(route_name="test_1", renderer="json")
 def test_1(request):
     """
     Test type 1: JSON serialization
     """
-    return {"message":"Hello, World!"}
+    return {"message": "Hello, World!"}
 
 
-@view_config(route_name='test_2', renderer='json')
+@view_config(route_name="test_2", renderer="json")
 def test_2(request):
     """
     Test type 2: Single database query
@@ -27,12 +27,12 @@ def test_2(request):
     return result.__json__()
 
 
-@view_config(route_name='test_3', renderer='json')
+@view_config(route_name="test_3", renderer="json")
 def test_3(request):
     """
     Test type 3: Multiple database queries
     """
-    queries = request.params['queries']
+    queries = request.params["queries"]
     try:
         queries = int(queries)
     except ValueError:
@@ -49,24 +49,22 @@ def test_3(request):
     return [obj.__json__() for obj in result]
 
 
-@view_config(route_name='test_4', renderer='templates/test_4.pt')
+@view_config(route_name="test_4", renderer="templates/test_4.pt")
 def test_4(request):
     """
     Test type 4: Fortunes
     """
     fortunes = [obj.__json__() for obj in DBSession.query(Fortune).all()]
-    fortunes.append(
-        {"id": 0, "message": "Additional fortune added at request time."}
-    )
-    return {'fortunes': sorted(fortunes, key=lambda x: x['message'])}
+    fortunes.append({"id": 0, "message": "Additional fortune added at request time."})
+    return {"fortunes": sorted(fortunes, key=lambda x: x["message"])}
 
 
-@view_config(route_name='test_5', renderer='json')
+@view_config(route_name="test_5", renderer="json")
 def test_5(request):
     """
     Test type 5: Database updates
     """
-    queries = request.params['queries']
+    queries = request.params["queries"]
     try:
         queries = int(queries)
     except ValueError:
@@ -87,13 +85,10 @@ def test_5(request):
     return resultset
 
 
-@view_config(route_name='test_6')
+@view_config(route_name="test_6")
 def test_6(request):
     """
     Test type 6: Plaintext
     """
-    response = Response(
-        body=b'Hello, World!',
-        content_type='text/plain',
-        )
+    response = Response(body=b"Hello, World!", content_type="text/plain")
     return response

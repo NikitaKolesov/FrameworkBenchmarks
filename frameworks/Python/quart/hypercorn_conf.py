@@ -1,7 +1,7 @@
 import multiprocessing
 import os
 
-_is_travis = os.environ.get('TRAVIS') == 'true'
+_is_travis = os.environ.get("TRAVIS") == "true"
 
 workers = multiprocessing.cpu_count()
 if _is_travis:

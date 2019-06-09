@@ -32,7 +32,7 @@ class Fortune(Base):
     message = Column(String)
 
     def serialize(self):
-        return {'id': self.id, 'message': self.message}
+        return {"id": self.id, "message": self.message}
 
 
 class World(Base):
@@ -42,7 +42,7 @@ class World(Base):
     randomNumber = Column(Integer)
 
     def serialize(self):
-        return {'id': self.id, 'randomNumber': self.randomNumber}
+        return {"id": self.id, "randomNumber": self.randomNumber}
 
 
 class CherryPyBenchmark(object):
@@ -105,12 +105,18 @@ class CherryPyBenchmark(object):
     def fortune(self):
         fortunes = cherrypy.request.db.query(Fortune).all()
         fortunes.append(
-            Fortune(id=0, message="Additional fortune added at request time."))
+            Fortune(id=0, message="Additional fortune added at request time.")
+        )
         fortunes.sort(key=attrgetter("message"))
         html = "<!DOCTYPE html><html><head><title>Fortunes</title></head><body><table><tr><th>id</th><th>message</th></tr>"
         for f in fortunes:
-            html += "<tr><td>" + str(f.id) + "</td><td>" + cgi.escape(
-                f.message) + "</td></tr>"
+            html += (
+                "<tr><td>"
+                + str(f.id)
+                + "</td><td>"
+                + cgi.escape(f.message)
+                + "</td></tr>"
+            )
         html += "</table></body></html>"
         return html
 
@@ -118,19 +124,21 @@ class CherryPyBenchmark(object):
 if __name__ == "__main__":
     # Register the SQLAlchemy plugin
     from saplugin import SAEnginePlugin
-    DBDRIVER = 'mysql'
-    DATABASE_URI = '%s://benchmarkdbuser:benchmarkdbpass@tfb-database:3306/hello_world?charset=utf8' % (
-        DBDRIVER)
+
+    DBDRIVER = "mysql"
+    DATABASE_URI = (
+        "%s://benchmarkdbuser:benchmarkdbpass@tfb-database:3306/hello_world?charset=utf8"
+        % (DBDRIVER)
+    )
     SAEnginePlugin(cherrypy.engine, DATABASE_URI).subscribe()
 
     # Register the SQLAlchemy tool
     from satool import SATool
+
     cherrypy.tools.db = SATool()
-    cherrypy.server.socket_host = '0.0.0.0'
-    cherrypy.quickstart(CherryPyBenchmark(), '', {
-        '/': {
-            'tools.db.on': True,
-            'log.screen': False,
-            'log.access_file': ''
-        }
-    })
+    cherrypy.server.socket_host = "0.0.0.0"
+    cherrypy.quickstart(
+        CherryPyBenchmark(),
+        "",
+        {"/": {"tools.db.on": True, "log.screen": False, "log.access_file": ""}},
+    )
